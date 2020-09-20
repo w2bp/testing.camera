@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_end_point" translatable="false">http://192.169.204.35/api/v2/</string>
+</resources>
