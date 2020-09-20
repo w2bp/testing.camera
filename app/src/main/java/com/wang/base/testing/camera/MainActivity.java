@@ -1,22 +1,17 @@
 package com.wang.base.testing.camera;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Process;
+import android.widget.Toast;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.wang.base.testing.camera.ui.base.BaseDialogActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseDialogActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,5 +27,18 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+    }
+
+    @Override
+    protected void setupDialogTitle() {
+    }
+
+    public void showErrorMessage(final String error) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
