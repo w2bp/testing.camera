@@ -22,17 +22,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 
 import com.wang.base.testing.camera.R;
+import com.wang.base.testing.camera.ui.base.BaseFragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 import static android.content.Context.CAMERA_SERVICE;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends BaseFragment {
 
     private static final int MAX_PREVIEW_WIDTH = 1920;
     private static final int MAX_PREVIEW_HEIGHT = 1080;
@@ -47,25 +51,28 @@ public class HomeFragment extends Fragment {
 
     private static final String TAG = "CameraTest";
 
-    private TextureView mTextureView;
+    @BindView(R.id.texture_view)
+    TextureView mTextureView;
+
 
     private CameraManager mCameraManager;
     private CameraDevice mCameraDevice;
     private CameraCaptureSession mCameraCaptureSession;
     private CaptureRequest.Builder mPreviewRequestBuilder;
-    private List<String> mBackCameraIds;
+    private String mBackCameraIds;
 
     private HandlerThread mHandlerThread;
     private Handler mHandler;
+    private Unbinder unbinder;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        mTextureView = root.findViewById(R.id.texture_view);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        getActivityComponent().inject(this);
+        unbinder = ButterKnife.bind(this, view);
 
-
-        return root;
+        return view;
     }
 
     @Override
@@ -95,7 +102,7 @@ public class HomeFragment extends Fragment {
         @SuppressLint("MissingPermission")
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            String mainBackCameraId = mBackCameraIds.get(0);
+            String mainBackCameraId = mBackCameraIds;
             try {
                 //camera's open operation is time consuming and is done in the mHandler thread.
                 mCameraManager.openCamera(mainBackCameraId, mCameraDeviceStateCallback, mHandler);
@@ -116,7 +123,6 @@ public class HomeFragment extends Fragment {
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
             mTextureView.getBitmap();
         }
     };
@@ -188,17 +194,23 @@ public class HomeFragment extends Fragment {
     }
 
     private void getAllBackCameraId() {
-        mBackCameraIds = new ArrayList<>();
         try {
             for (String cameraId : mCameraManager.getCameraIdList()) {
                 CameraCharacteristics characteristics = mCameraManager.getCameraCharacteristics(cameraId);
                 Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
                 if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
-                    mBackCameraIds.add(cameraId);
+                    mBackCameraIds = cameraId;
+                    break;
                 }
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 }
